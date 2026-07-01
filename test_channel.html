@@ -1,48 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Broadcast Test</title>
-</head>
-<body>
-
 <script>
 
 const canal = new BroadcastChannel("LOTES");
 
 const params = new URLSearchParams(location.search);
-const nombre = params.get("id") || "SIN_ID";
+const nombre = params.get("id");
 
 console.log(nombre + " iniciado");
 
 canal.onmessage = function(e){
 
-    console.log(
-        nombre,
-        "RECIBIÓ:",
-        e.data
-    );
+    console.log(nombre + " recibió:", e.data);
 
 };
 
-window.enviarMensaje = function(){
+setTimeout(()=>{
 
-    canal.postMessage({
+    canal.postMessage(nombre + " dice HOLA");
 
-        origen:nombre,
+    console.log(nombre + " envió");
 
-        hora:new Date().toLocaleTimeString()
-
-    });
-
-    console.log(
-        nombre,
-        "ENVÍO MENSAJE"
-    );
-
-};
+},3000);
 
 </script>
-
-</body>
-</html>
