@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Información del Lote</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    background:transparent;
+    font-family:Arial, Helvetica, sans-serif;
+    overflow:hidden;
+}
+
+#panel{
+
+    position:fixed;
+
+    top:124px;
+    left:0px;
+
+    width:336px;
+    max-width:calc(100vw - 20px);
+
+    background:#fff;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:0 12px 40px rgba(0,0,0,.25);
+
+    transform:translateX(-120%);
+
+    transition:.4s ease;
+
+}
+
+#panel.visible{
+
+    transform:translateX(0);
+
+}
+
+#imagenContainer{
+
+    position:relative;
+
+    height:192px;
+
+    background:#f3f3f3;
+
+}
+
+#imagenContainer::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(0,0,0,.35);
+
+    opacity:0;
+
+    transition:.3s;
+
+    pointer-events:none;
+
+}
+
+#imagenContainer.no-disponible::after{
+
+    opacity:1;
+
+}
+
+#imagen{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    display:block;
+
+}
+
+#cerrar{
+
+    position:absolute;
+
+    top:15px;
+    right:15px;
+
+    width:52px;
+    height:52px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    cursor:pointer;
+
+    font-size:30px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.25);
+
+}
+
+#contenido{
+
+    padding:19px;
+
+}
+
+#cabecera{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+#lote{
+
+    margin:0;
+
+    font-size:18px;
+
+    color:#222;
+
+}
+
+#estado{
+
+    padding:6px 13px;
+
+    border-radius:30px;
+
+    color:white;
+
+    font-weight:bold;
+
+    font-size:11px;
+
+}
+
+.estado-libre{
+
+    background:#16a34a;
+
+}
+
+.estado-reservado{
+
+    background:#eab308;
+
+}
+
+.estado-vendido{
+
+    background:#dc2626;
+
+}
+
+.fila{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:11px 0;
+
+    border-bottom:1px solid #e5e5e5;
+
+}
+
+.label{
+
+    color:#666;
+
+    font-size:12px;
+
+}
+
+.valor{
+
+    color:#222;
+
+    font-weight:600;
+    font-size:13px;
+    text-align:right;
+
+}
+
+#consultarPrecio{
+
+    width:100%;
+    border:none;
+    background:#3f4d5d;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+    padding:14px;
+    border-radius:35px;
+    cursor:pointer;
+    margin-top:20px;
+
+}
+
+#consultarPrecio.disabled{
+
+    background:#bdbdbd;
+    cursor:not-allowed;
+    opacity:.7;
+
+}
+
+#modalConsulta{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+#ventanaConsulta{
+
+    width:520px;
+
+    max-width:95vw;
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:28px;
+
+    position:relative;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+
+}
+
+#cerrarModal{
+
+    position:absolute;
+
+    right:20px;
+
+    top:20px;
+
+    width:50px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#f2f2f2;
+
+    cursor:pointer;
+
+    font-size:34px;
+
+}
+
+#datosLote{
+
+    color:#777;
+
+    margin-bottom:20px;
+
+}
+
+#ventanaConsulta input,
+#ventanaConsulta textarea{
+
+    width:100%;
+
+    padding:14px;
+
+    margin-top:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:30px;
+
+    font-size:16px;
+
+}
+
+#ventanaConsulta textarea{
+
+    height:120px;
+
+    resize:none;
+
+}
+
+#enviarConsulta{
+
+    width:100%;
+
+    margin-top:25px;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:35px;
+
+    background:#3f4d5d;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+@media(max-width:600px){
+
+    #panel{
+
+        width:calc(100vw - 20px);
+
+    }
+
+    #imagenContainer{
+
+        height:180px;
+
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="panel">
+
+    <div id="imagenContainer">
+
+        <img id="imagen" src="" alt="Imagen del lote">
+
+        <button id="cerrar">×</button>
+
+    </div>
+
+    <div id="contenido">
+
+        <div id="cabecera">
+
+            <h2 id="lote">Cargando...</h2>
+
+            <span id="estado">...</span>
+
+        </div>
+
+        <div class="fila">
+
+            <span class="label">Medidas</span>
+
+            <span class="valor" id="medidas"></span>
+
+        </div>
+
+        <div class="fila">
+
+            <span class="label">Área</span>
+
+            <span class="valor" id="area"></span>
+
+        </div>
+
+        <div class="fila">
+
+            <span class="label">Ubicación</span>
+
+            <span class="valor" id="ubicacion"></span>
+
+        </div>
+
+<button id="consultarPrecio">
+
+    ✉ Consultar precio
+
+</button>
+    </div>
+
+</div>
+<div id="modalConsulta">
+
+    <div id="ventanaConsulta">
+
+        <button id="cerrarModal">×</button>
+
+        <h2>Consultar precio</h2>
+
+        <p id="datosLote"></p>
+
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Nombre">
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email">
+
+        <input
+            type="tel"
+            id="telefono"
+            placeholder="Teléfono">
+
+        <textarea
+            id="mensaje"
+            placeholder="Mensaje"></textarea>
+
+        <button id="enviarConsulta">
+
+            Enviar
+
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+const panel = document.getElementById("panel");
+
+const loteEl = document.getElementById("lote");
+const estadoEl = document.getElementById("estado");
+const medidasEl = document.getElementById("medidas");
+const areaEl = document.getElementById("area");
+const ubicacionEl = document.getElementById("ubicacion");
+const imagenEl = document.getElementById("imagen");
+
+document.getElementById("cerrar")
+.addEventListener("click",()=>{
+
+    panel.classList.remove("visible");
+
+    document
+    .getElementById("modalConsulta")
+    .style.display="none";
+
+});
+
+document.addEventListener("click",(e)=>{
+
+    const clickDentroPanel =
+    panel.contains(e.target);
+
+    const clickDentroModal =
+    document
+    .getElementById("modalConsulta")
+    .contains(e.target);
+
+    if(
+        !clickDentroPanel &&
+        !clickDentroModal &&
+        panel.classList.contains("visible")
+    ){
+
+        panel.classList.remove("visible");
+
+    }
+
+});
+
+function obtenerParametro(nombre){
+
+    const url = new URL(window.location.href);
+
+    return url.searchParams.get(nombre);
+
+}
+
+function cargarLote(){
+
+    const script = document.createElement("script");
+
+    script.src =
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?callback=procesarDatos";
+
+    document.body.appendChild(script);
+
+}
+
+function procesarDatos(datos){
+
+    const loteBuscado =
+    obtenerParametro("lote");
+
+    if(!loteBuscado){
+
+        loteEl.textContent =
+        "No se indicó lote";
+
+        return;
+
+    }
+
+    const lote =
+    datos.find(item =>
+        item.Lote === loteBuscado
+    );
+
+    if(!lote){
+
+        loteEl.textContent =
+        "Lote no encontrado";
+
+        return;
+
+    }
+
+    loteEl.textContent =
+    lote.Lote;
+
+    medidasEl.textContent =
+    lote.Medidas || "-";
+
+    areaEl.textContent =
+    lote.Area || "-";
+
+    ubicacionEl.textContent =
+    lote.Ubicacion || "-";
+
+    estadoEl.textContent =
+    lote.Estado || "";
+
+    estadoEl.className = "";
+
+    const estado =
+    (lote.Estado || "")
+    .toUpperCase();
+
+    if(estado === "LIBRE"){
+
+        estadoEl.classList
+        .add("estado-libre");
+
+    }
+    else if(
+        estado === "RESERVADO"
+    ){
+
+        estadoEl.classList
+        .add("estado-reservado");
+
+    }
+    else{
+
+        estadoEl.classList
+        .add("estado-vendido");
+
+    }
+
+const imagenContainer =
+document.getElementById("imagenContainer");
+
+if(
+    estado === "RESERVADO" ||
+    estado === "VENDIDO"
+){
+
+    imagenContainer.classList
+    .add("no-disponible");
+
+}
+else{
+
+    imagenContainer.classList
+    .remove("no-disponible");
+
+}
+
+const botonConsulta =
+document.getElementById("consultarPrecio");
+
+if(estado === "RESERVADO"){
+
+    botonConsulta.disabled = true;
+
+    botonConsulta.style.background =
+    "#eab308";
+
+    botonConsulta.style.color =
+    "#ffffff";
+
+    botonConsulta.innerHTML =
+    "⏳ Lote reservado";
+
+}
+else if(estado === "VENDIDO"){
+
+    botonConsulta.disabled = true;
+
+    botonConsulta.style.background =
+    "#dc2626";
+
+    botonConsulta.style.color =
+    "#ffffff";
+
+    botonConsulta.innerHTML =
+    "✖ Lote vendido";
+
+}
+else{
+
+    botonConsulta.disabled = false;
+
+    botonConsulta.style.background =
+    "#3f4d5d";
+
+    botonConsulta.style.color =
+    "#ffffff";
+
+    botonConsulta.innerHTML =
+    "✉ Consultar precio";
+
+}
+    if(
+        lote.Imagen &&
+        lote.Imagen.trim() !== ""
+    ){
+
+        imagenEl.src =
+        lote.Imagen;
+
+    }
+    else{
+
+        imagenEl.src =
+        "thumbnail.png";
+
+    }
+
+    setTimeout(()=>{
+
+        panel.classList
+        .add("visible");
+
+    },100);
+
+}
+
+document
+.getElementById("consultarPrecio")
+.addEventListener("click",()=>{
+
+       if(
+        document
+        .getElementById("consultarPrecio")
+        .disabled
+    ){
+
+        return;
+
+    }
+    document
+    .getElementById("modalConsulta")
+    .style.display="flex";
+
+    document
+    .getElementById("datosLote")
+    .textContent =
+    loteEl.textContent +
+    " - " +
+    ubicacionEl.textContent;
+
+});
+
+document
+.getElementById("cerrarModal")
+.addEventListener("click",()=>{
+
+    document
+    .getElementById("modalConsulta")
+    .style.display="none";
+
+});
+
+document
+.getElementById("modalConsulta")
+.addEventListener("click",(e)=>{
+
+    if(
+        e.target.id === "modalConsulta"
+    ){
+
+        document
+        .getElementById("modalConsulta")
+        .style.display="none";
+
+    }
+
+});
+
+document.addEventListener("keydown",(e)=>{
+
+    if(
+        e.key === "Escape"
+    ){
+
+        document
+        .getElementById("modalConsulta")
+        .style.display="none";
+
+    }
+
+});
+
+document
+.getElementById("enviarConsulta")
+.addEventListener("click", async ()=>{
+
+    const nombre =
+    document.getElementById("nombre").value.trim();
+
+    const email =
+    document.getElementById("email").value.trim();
+
+    const telefono =
+    document.getElementById("telefono").value.trim();
+
+    const mensaje =
+    document.getElementById("mensaje").value.trim();
+
+    if(nombre === ""){
+
+        alert("Ingrese su nombre");
+
+        return;
+
+    }
+
+    if(telefono === ""){
+
+        alert("Ingrese su teléfono");
+
+        return;
+
+    }
+
+    const datos = {
+
+        lote: loteEl.textContent,
+
+        estado: estadoEl.textContent,
+
+        area: areaEl.textContent,
+
+        medidas: medidasEl.textContent,
+
+        nombre: nombre,
+
+        email: email,
+
+        telefono: telefono,
+
+        mensaje: mensaje
+
+    };
+
+    try{
+
+        await fetch(
+        "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+        {
+            method:"POST",
+            body:JSON.stringify(datos)
+        });
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+    const texto =
+`Hola, deseo consultar el precio del siguiente lote:
+
+Lote: ${loteEl.textContent}
+Ubicación: ${ubicacionEl.textContent}
+Estado: ${estadoEl.textContent}
+Área: ${areaEl.textContent}
+Medidas: ${medidasEl.textContent}
+
+Nombre: ${nombre}
+Email: ${email}
+Teléfono: ${telefono}
+
+Mensaje:
+${mensaje}`;
+
+    const whatsapp =
+    "https://wa.me/51989567212?text=" +
+    encodeURIComponent(texto);
+
+    window.open(
+        whatsapp,
+        "_blank"
+    );
+
+});
+cargarLote();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Panel Administrativo</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f3f4f6;
+}
+
+#loginBox{
+    width:400px;
+    max-width:95vw;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+h2{
+    margin-top:0;
+    text-align:center;
+    color:#2c3e50;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    font-size:15px;
+}
+
+button{
+    width:100%;
+    margin-top:20px;
+    padding:14px;
+    border:none;
+    border-radius:30px;
+    background:#3f4d5d;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#error{
+    margin-top:15px;
+    color:red;
+    text-align:center;
+}
+
+#panel{
+    display:none;
+    width:95%;
+    max-width:1200px;
+}
+
+#usuarioLogeado{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
+#usuarioHeader{
+
+    position:relative;
+
+    margin-bottom:20px;
+
+}
+#contenedorLotes{
+    margin-top:20px;
+}
+
+.tabla{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+}
+
+.tabla th{
+    background:#3f4d5d;
+    color:white;
+    padding:15px;
+    text-align:left;
+}
+
+.tabla td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+}
+
+.estado-libre{
+    color:#16a34a;
+    font-weight:bold;
+}
+
+.estado-reservado{
+    color:#eab308;
+    font-weight:bold;
+}
+
+.estado-vendido{
+    color:#dc2626;
+    font-weight:bold;
+}
+
+#modalEstado{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.4);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+#ventanaEstado{
+
+    width:400px;
+
+    max-width:95vw;
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:25px;
+
+}
+
+#ventanaEstado select{
+
+    width:100%;
+
+    padding:12px;
+
+    margin-top:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    font-size:16px;
+
+}
+
+.accionesModal{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:20px;
+
+}
+
+.accionesModal button{
+
+    flex:1;
+
+}
+#menuAdmin{
+
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+}
+
+#menuAdmin button{
+
+    width:auto;
+    padding:12px 25px;
+
+}
+
+#contenedorAuditoria{
+
+    margin-top:20px;
+
+}
+#herramientas{
+
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+
+}
+
+#buscarLote{
+
+    width:250px;
+    margin:0;
+
+}
+
+#herramientas button{
+
+    width:auto;
+    margin:0;
+    padding:10px 18px;
+
+}
+#dashboard{
+
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+
+    justify-content:center;
+
+}
+
+.cardDashboard{
+
+    width:220px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:15px;
+
+}
+
+.cardDashboard h3{
+
+    margin:0;
+
+    font-size:28px;
+
+}
+
+.cardDashboard p{
+
+    margin:5px 0 0 0;
+
+    font-weight:bold;
+
+}
+#cerrarSesion{
+
+    position:absolute;
+
+    top:20px;
+
+    right:20px;
+
+    width:auto;
+
+    margin:0;
+
+    padding:12px 25px;
+
+    background:#dc2626;
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="loginBox">
+
+    <h2>Panel Administrativo</h2>
+
+    <input
+        type="text"
+        id="usuario"
+        placeholder="Usuario">
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Contraseña">
+
+    <button id="btnLogin">
+
+        Ingresar
+
+    </button>
+
+    <div id="error"></div>
+
+</div>
+
+<div id="panel">
+
+    <div id="usuarioHeader">
+
+    <div id="usuarioLogeado"></div>
+<div
+id="ultimaActualizacion"
+style="
+text-align:center;
+font-size:13px;
+margin-bottom:15px;
+color:#666;
+">
+🟢 Sistema conectado
+</div>
+
+    <button id="cerrarSesion">
+
+        Cerrar Sesión
+
+    </button>
+
+</div>
+    <div id="dashboard"></div>
+
+    <div id="menuAdmin">
+
+    <button id="btnLotes">
+        LOTES
+    </button>
+
+    <button id="btnAuditoria">
+    AUDITORÍA
+</button>
+    <button id="btnAsesores">
+        ASESORES
+    </button>
+<button id="btnConsultas">
+    CONSULTAS
+</button>
+<button
+id="btnSolicitudes"
+class="menu-btn">
+
+SOLICITUDES
+<span id="contadorSolicitudes"></span>
+
+</button>
+    
+</div>
+
+    <div id="herramientas">
+
+    <input
+    type="text"
+    id="buscarLote"
+    placeholder="🔍 Buscar lote...">
+
+    <button
+    id="filtroTodos">
+
+        TODOS
+
+    </button>
+
+    <button
+    id="filtroLibres">
+
+        LIBRES
+
+    </button>
+
+    <button
+    id="filtroReservados">
+
+        RESERVADOS
+
+    </button>
+
+    <button
+    id="filtroVendidos">
+
+        VENDIDOS
+
+    </button>
+
+    
+</div>
+
+<div
+id="contenedorLotes"
+style="overflow-x:auto;">
+</div>
+
+    <div
+id="contenedorAuditoria"
+style="overflow-x:auto;">
+</div>
+<div
+id="contenedorAsesores"
+style="overflow-x:auto;">
+</div>
+<div
+id="contenedorConsultas"
+style="overflow-x:auto;">
+</div>
+<div
+id="contenedorSolicitudes"
+style="display:none;">
+
+<h2
+style="
+text-align:center;
+margin-bottom:30px;
+">
+
+Solicitudes Pendientes
+
+</h2>
+
+<div
+style="
+margin-bottom:20px;
+">
+
+<input
+
+type="text"
+
+id="buscarSolicitud"
+
+placeholder="Buscar usuario o lote..."
+
+style="
+width:350px;
+padding:12px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+"
+
+onkeyup="filtrarSolicitudes()"
+
+>
+
+</div>
+<div
+id="listaSolicitudes">
+</div>
+
+</div>
+
+</div>
+<div id="modalNotificacion"
+style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+justify-content:center;
+align-items:center;
+z-index:9999;
+">
+
+<div style="
+background:white;
+padding:30px;
+border-radius:15px;
+width:450px;
+max-width:90%;
+text-align:center;
+">
+
+<h2 id="tituloNotificacion">
+Notificación
+</h2>
+
+<div
+id="mensajeNotificacion"
+style="
+margin:20px 0;
+line-height:1.6;
+">
+</div>
+<button
+id="btnCerrarNotificacion">
+Aceptar
+</button>
+
+</div>
+
+</div>
+<div id="modalEstado">
+
+    <div id="ventanaEstado">
+
+        <h2>Cambiar Estado</h2>
+
+        <p id="loteSeleccionado"></p>
+
+        <select id="nuevoEstado">
+
+            <option value="LIBRE">LIBRE</option>
+
+            <option value="RESERVADO">RESERVADO</option>
+
+            <option value="VENDIDO">VENDIDO</option>
+
+        </select>
+
+        <div class="accionesModal">
+
+            <button
+            id="btnCancelarEstado">
+
+                Cancelar
+
+            </button>
+
+            <button
+type="button"
+id="btnGuardarEstado">
+
+Guardar
+
+</button>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="modalConfirmacion"
+style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.5);
+justify-content:center;
+align-items:center;
+z-index:9999;
+">
+
+<div style="
+background:white;
+padding:30px;
+border-radius:15px;
+width:450px;
+max-width:90%;
+text-align:center;
+">
+
+<h2 id="tituloConfirmacion">
+Confirmación
+</h2>
+
+<div
+id="mensajeConfirmacion"
+style="
+margin:20px 0;
+line-height:1.6;
+">
+</div>
+
+<div style="
+display:flex;
+gap:10px;
+">
+
+<button
+id="btnCancelarConfirmacion"
+style="
+background:#6b7280;
+">
+Cancelar
+</button>
+
+<button
+id="btnAceptarConfirmacion">
+Aceptar
+</button>
+
+</div>
+
+</div>
+
+</div>
+<div id="modalPassword" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.5);
+justify-content:center;
+align-items:center;
+z-index:9999;
+">
+
+    <div style="
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    min-width:350px;
+    text-align:center;
+    ">
+
+        <h3>
+            Contraseña del asesor
+        </h3>
+
+        <div
+        id="passwordAsesor"
+        style="
+        font-size:22px;
+        font-weight:bold;
+        margin:20px 0;
+        ">
+        ********
+        </div>
+
+       <button
+onclick="
+document
+.getElementById('modalPassword')
+.style.display='none'
+">
+
+Cerrar
+
+</button>
+
+    </div>
+</div>
+<script>
+
+document
+.getElementById("btnLogin")
+.addEventListener("click",login);
+document
+.getElementById("password")
+.addEventListener(
+"focus",
+function(){
+
+    this.select();
+
+});
+function aplicarPermisosRol(rol){
+
+    if(rol === "ASESOR"){
+
+        document
+        .getElementById("btnAuditoria")
+        .style.display = "none";
+
+        document
+        .getElementById("btnAsesores")
+        .style.display = "none";
+
+        document
+        .getElementById("btnConsultas")
+        .style.display = "none";
+
+document
+.getElementById(
+"btnSolicitudes"
+)
+.style.display =
+"none";
+
+}
+    else{
+
+        document
+        .getElementById("btnAuditoria")
+        .style.display = "inline-block";
+
+        document
+        .getElementById("btnAsesores")
+        .style.display = "inline-block";
+
+        document
+        .getElementById("btnConsultas")
+        .style.display = "inline-block";
+
+document
+.getElementById(
+"btnSolicitudes"
+)
+.style.display =
+"inline-block";
+
+    }
+
+}
+async function login(){
+
+    const usuario =
+    document.getElementById("usuario")
+    .value.trim();
+
+    const password =
+    document.getElementById("password")
+    .value.trim();
+
+    if(
+        usuario === "" ||
+        password === ""
+    ){
+
+        document
+        .getElementById("error")
+        .textContent =
+        "Ingrese usuario y contraseña";
+
+        return;
+
+    }
+
+    try{
+
+        const respuesta =
+        await fetch(
+        "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+        {
+            method:"POST",
+
+            body:JSON.stringify({
+
+    action:"login",
+
+    usuario:usuario,
+
+    password:password
+
+})
+
+});
+
+        const resultado =
+        await respuesta.json();
+
+        if(resultado.ok){
+
+    localStorage.setItem(
+"rol",
+resultado.rol
+);
+
+aplicarPermisosRol(
+resultado.rol
+);
+
+localStorage.setItem(
+"usuario",
+resultado.nombre
+);
+localStorage.setItem(
+"logeado",
+"SI"
+);
+    document
+    .getElementById("loginBox")
+    .style.display = "none";
+
+    document
+    .getElementById("panel")
+    .style.display = "block";
+
+            document
+.getElementById("usuarioLogeado")
+.innerHTML =
+
+"<h2>Bienvenido " +
+resultado.nombre +
+"</h2>" +
+
+"<p><b>Rol:</b> " +
+resultado.rol +
+"</p>";
+
+await cargarLotes();
+
+await verificarNotificaciones();
+
+        }
+        else{
+
+    document
+    .getElementById("error")
+    .textContent =
+    "Usuario o contraseña incorrectos";
+
+    const campoPassword =
+    document.getElementById(
+    "password"
+    );
+
+    campoPassword.value = "";
+
+    campoPassword.focus();
+
+}
+
+    }
+    catch(error){
+
+        document
+        .getElementById("error")
+        .textContent =
+        "Error de conexión";
+
+        console.log(error);
+
+    }
+
+}
+
+let todosLosLotes = [];
+
+let filtroActual = "TODOS";
+let solicitudesPendientes = [];
+let totalSolicitudesAnterior = 0;
+let colaNotificaciones = [];
+
+
+function renderizarLotes(datos){
+
+let html = `
+<table class="tabla">
+    <tr>
+        <th>Lote</th>
+        <th>Estado</th>
+        <th>Área</th>
+        <th>Ubicación</th>
+        <th>Acción</th>
+    </tr>
+`;
+
+datos.forEach(lote=>{
+const rol =
+localStorage.getItem("rol");
+
+const pendiente =
+solicitudesPendientes.find(
+s =>
+s.Lote === lote.Lote
+);
+
+const bloqueadoEstado =
+
+rol === "ASESOR" &&
+
+(
+lote.Estado === "RESERVADO" ||
+lote.Estado === "VENDIDO"
+);
+
+const bloqueado =
+bloqueadoEstado ||
+pendiente;
+
+    let clase = "";
+
+    if(lote.Estado === "LIBRE"){
+        clase = "estado-libre";
+    }
+    else if(lote.Estado === "RESERVADO"){
+        clase = "estado-reservado";
+    }
+    else{
+        clase = "estado-vendido";
+    }
+
+    html += `
+    <tr>
+
+        <td>${lote.Lote}</td>
+
+        <td class="${clase}">
+    ${lote.Estado}
+    
+</td>
+
+        <td>${lote.Area}</td>
+
+        <td>${lote.Ubicacion}</td>
+
+        <td style="
+text-align:center;
+vertical-align:middle;
+">
+
+<button
+
+${bloqueado ? "disabled" : ""}
+
+style="
+width:180px;
+margin:0 auto;
+display:block;
+opacity:${bloqueado ? "0.5" : "1"};
+cursor:${bloqueado ? "not-allowed" : "pointer"};
+"
+
+onclick="cambiarEstado('${lote.Lote}')">
+
+${pendiente ? "En Espera ⏳" : "Cambiar"}
+
+</button>
+
+</td>
+
+    </tr>
+    `;
+
+});
+
+html += "</table>";
+
+document
+.getElementById(
+"contenedorLotes"
+)
+.innerHTML =
+html;
+
+}
+
+function actualizarDashboard(datos){
+
+const total =
+datos.length;
+
+const libres =
+datos.filter(
+x=>x.Estado==="LIBRE"
+).length;
+
+const reservados =
+datos.filter(
+x=>x.Estado==="RESERVADO"
+).length;
+
+const vendidos =
+datos.filter(
+x=>x.Estado==="VENDIDO"
+).length;
+
+document
+.getElementById(
+"dashboard"
+)
+.innerHTML = `
+
+<div class="cardDashboard">
+
+    <h3>${total}</h3>
+
+    <p>Total Lotes</p>
+
+</div>
+
+<div class="cardDashboard">
+
+    <h3>${libres}</h3>
+
+    <p>🟢 Libres</p>
+
+</div>
+
+<div class="cardDashboard">
+
+    <h3>${reservados}</h3>
+
+    <p>🟡 Reservados</p>
+
+</div>
+
+<div class="cardDashboard">
+
+    <h3>${vendidos}</h3>
+
+    <p>🔴 Vendidos</p>
+
+</div>
+
+`;
+
+}
+
+async function cargarLotes(){
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec"
+    );
+
+    const datos =
+    await respuesta.json();
+
+    todosLosLotes = datos;
+
+try{
+
+const respSolicitudes =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=solicitudesPendientes"
+);
+
+solicitudesPendientes =
+await respSolicitudes.json();
+
+}
+catch(error){
+
+solicitudesPendientes = [];
+
+}
+
+actualizarDashboard(datos);
+
+renderizarLotes(datos);
+
+}
+document
+.getElementById(
+"btnCancelarEstado"
+)
+.addEventListener(
+"click",
+()=>{
+
+    document
+    .getElementById(
+    "modalEstado"
+    )
+    .style.display =
+    "none";
+
+    cargarLotes();
+
+});
+
+
+document
+.getElementById(
+"btnGuardarEstado"
+)
+.onclick = async (e)=>{
+
+if(e){
+e.preventDefault();
+}
+
+await guardarEstado();
+
+};
+let loteActual = "";
+let estadoOriginal = "";
+
+async function guardarEstado(){
+
+const verificacion =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec"
+);
+
+const lotes =
+await verificacion.json();
+
+const loteServidor =
+lotes.find(
+x => x.Lote === loteActual
+);
+
+if(!loteServidor){
+
+mostrarNotificacion(
+"Error",
+"No se encontró el lote."
+);
+
+return;
+
+}
+if(
+loteServidor.Estado !==
+estadoOriginal
+){
+
+document
+.getElementById(
+"modalEstado"
+)
+.style.display =
+"none";
+
+mostrarNotificacion(
+
+"Estado actualizado",
+
+"Este lote ya no se encuentra en estado " +
+
+estadoOriginal +
+
+".<br><br>Estado actual: <b>" +
+
+loteServidor.Estado +
+
+"</b>"
+
+);
+
+cargarLotes();
+
+return;
+
+}
+    const estado =
+    document
+    .getElementById("nuevoEstado")
+    .value;
+
+    const usuario =
+    localStorage.getItem(
+    "usuario"
+    );
+const rol =
+localStorage.getItem(
+"rol"
+);
+
+if(rol === "ASESOR"){
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+{
+method:"POST",
+
+body:JSON.stringify({
+
+action:"crearSolicitud",
+
+usuario:usuario,
+
+lote:loteActual,
+
+estadoActual:estadoOriginal,
+
+estadoSolicitado:estado
+
+})
+
+}
+);
+
+const resultado =
+await respuesta.json();
+
+if(resultado.ok){
+
+document
+.getElementById(
+"modalEstado"
+)
+.style.display =
+"none";
+
+mostrarNotificacion(
+
+"Solicitud enviada",
+
+"Su solicitud fue enviada al administrador."
+
+);
+
+setTimeout(
+()=>{
+cargarLotes();
+},
+500
+);
+
+return;
+
+}
+else{
+
+mostrarNotificacion(
+
+"Solicitud existente",
+
+resultado.mensaje ||
+
+"Ya existe una solicitud pendiente para este lote."
+
+);
+
+}
+
+return;
+
+} 
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+{
+    method:"POST",
+
+    body:JSON.stringify({
+
+        action:"actualizarEstado",
+        lote:loteActual,
+        estado:estado,
+        usuario:usuario,
+        estadoOriginal:estadoOriginal
+
+    })
+
+}
+);
+
+    const resultado =
+await respuesta.json();
+
+if(
+resultado.mensaje ===
+"LOTE_MODIFICADO"
+){
+
+document
+.getElementById(
+"modalEstado"
+)
+.style.display =
+"none";
+
+mostrarNotificacion(
+
+"Estado actualizado",
+
+"Este lote ya fue modificado por otro usuario.<br><br>La tabla será actualizada."
+
+);
+
+cargarLotes();
+
+return;
+
+}
+
+    if(resultado.ok){
+
+document
+.getElementById(
+"modalEstado"
+)
+.style.display =
+"none";
+
+await cargarLotes();
+
+mostrarNotificacion(
+
+"Estado actualizado",
+
+"El lote <b>" +
+
+loteActual +
+
+"</b> fue cambiado a <b>" +
+
+estado +
+
+"</b>."
+
+);
+
+}
+    else{
+
+mostrarNotificacion(
+
+"Estado actualizado",
+
+resultado.mensaje ||
+
+"El estado del lote cambió mientras realizaba la operación."
+
+);
+
+cargarLotes();
+
+}
+
+}
+async function cambiarEstado(lote){
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec"
+    );
+
+    const datos =
+    await respuesta.json();
+
+    const loteActualizado =
+    datos.find(
+    x => x.Lote === lote
+    );
+if(!loteActualizado){
+
+mostrarNotificacion(
+"Error",
+"No se encontró el lote."
+);
+
+return;
+
+}
+loteActual = lote;
+
+estadoOriginal =
+loteActualizado.Estado;
+const filaTabla =
+todosLosLotes.find(
+x => x.Lote === lote
+);
+
+if(
+
+filaTabla &&
+
+filaTabla.Estado !==
+loteActualizado.Estado
+
+){
+
+mostrarNotificacion(
+
+"Estado actualizado",
+
+"El lote ahora se encuentra en estado: <b>" +
+
+loteActualizado.Estado +
+
+"</b>"
+
+);
+
+window.actualizarPendiente = true;
+
+return;
+
+}
+const rol =
+localStorage.getItem("rol");
+if(
+loteActualizado.Estado === "VENDIDO" ||
+loteActualizado.Estado === "RESERVADO"
+){
+
+const rol =
+localStorage.getItem("rol");
+
+if(rol === "ASESOR"){
+
+mostrarNotificacion(
+
+"Acceso restringido",
+
+"Este lote ya se encuentra " +
+loteActualizado.Estado
+
+);
+
+cargarLotes();
+
+return;
+
+}
+
+}
+
+    document
+    .getElementById(
+    "loteSeleccionado"
+    )
+    .textContent =
+    lote +
+    " (" +
+    loteActualizado.Estado +
+    ")";
+document
+.getElementById(
+"nuevoEstado"
+)
+.value =
+loteActualizado.Estado;
+
+    document
+    .getElementById(
+    "modalEstado"
+    )
+    .style.display =
+    "flex";
+
+}
+
+document
+.getElementById("btnLotes")
+.addEventListener(
+"click",
+()=>{
+cargarLotes();
+
+ocultarTodo();
+ document
+.getElementById(
+"dashboard"
+)
+.style.display =
+"flex";
+document.getElementById(
+"herramientas"
+).style.display = "flex";
+    document.getElementById(
+"contenedorLotes"
+).style.display = "block";
+
+});
+document
+.getElementById("btnAuditoria")
+.addEventListener(
+"click",
+cargarAuditoria
+);
+async function cargarAuditoria(){
+
+const rol =
+localStorage.getItem("rol");
+
+if(rol !== "ADMIN"){
+    return;
+}
+
+ocultarTodo();
+
+document
+.getElementById(
+"contenedorAuditoria"
+)
+.style.display =
+"block";
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=auditoria"
+);
+
+const datos =
+await respuesta.json();
+datos.sort((a,b)=>{
+
+    return new Date(b.Fecha)
+    -
+    new Date(a.Fecha);
+
+});
+
+const reservados =
+datos.filter(
+x => x.Despues === "RESERVADO"
+).length;
+
+const vendidos =
+datos.filter(
+x => x.Despues === "VENDIDO"
+).length;
+    let html = `
+<input
+id="buscarAuditoria"
+placeholder="🔍 Buscar usuario..."
+style="
+width:300px;
+margin-bottom:20px;
+">
+<div id="resumenAuditoria"
+style="
+display:flex;
+gap:20px;
+margin-bottom:20px;
+">
+
+<div class="cardDashboard">
+
+<h3 id="totalCambios">
+${datos.length}
+</h3>
+
+<p>
+Total Cambios
+</p>
+
+</div>
+
+<div class="cardDashboard">
+
+<h3 id="totalReservados">
+${reservados}
+</h3>
+
+<p>
+🟡 Reservados
+</p>
+
+</div>
+
+<div class="cardDashboard">
+
+<h3 id="totalVendidos">
+${vendidos}
+</h3>
+
+<p>
+🔴 Vendidos
+</p>
+
+</div>
+
+</div>
+
+<table class="tabla">
+
+<tr>
+
+        <th>Fecha</th>
+
+        <th>Usuario</th>
+
+        <th>Lote</th>
+
+        <th>Antes</th>
+
+        <th>Después</th>
+
+      </tr>
+
+    `;
+
+    datos.forEach(item=>{
+
+      html += `
+
+      <tr>
+
+        <td>${formatearFecha(item.Fecha)}</td>
+
+        <td>${item.Usuario || ""}</td>
+
+        <td>${item.Lote || ""}</td>
+
+        <td>${item.Antes || ""}</td>
+
+        <td>${item.Despues || ""}</td>
+
+      </tr>
+
+      `;
+
+    });
+
+    html += "</table>";
+
+    document
+    .getElementById(
+    "contenedorAuditoria"
+    )
+    .innerHTML =
+    html;
+document
+.getElementById(
+"buscarAuditoria"
+)
+.addEventListener(
+"input",
+function(){
+let total = 0;
+
+let reservados = 0;
+
+let vendidos = 0;
+const texto =
+this.value.toUpperCase();
+
+const filas =
+document.querySelectorAll(
+"#contenedorAuditoria table tr"
+);
+
+filas.forEach((fila,i)=>{
+
+if(i===0)return;
+
+const usuario =
+fila.children[1]
+.textContent
+.toUpperCase();
+
+if(usuario.includes(texto)){
+
+    fila.style.display = "";
+
+    total++;
+
+    const despues =
+    fila.children[4]
+    .textContent
+    .trim();
+
+    if(despues === "RESERVADO"){
+        reservados++;
+    }
+
+    if(despues === "VENDIDO"){
+        vendidos++;
+    }
+
+}
+else{
+
+    fila.style.display = "none";
+
+}
+
+});
+
+document.getElementById(
+"totalCambios"
+).textContent = total;
+
+document.getElementById(
+"totalReservados"
+).textContent = reservados;
+
+document.getElementById(
+"totalVendidos"
+).textContent = vendidos;
+
+});
+localStorage.setItem(
+"auditoriaVista",
+Date.now()
+);
+
+}
+document
+.getElementById("btnAsesores")
+.addEventListener(
+"click",
+cargarAsesores
+);
+document
+.getElementById("btnConsultas")
+.addEventListener(
+"click",
+cargarConsultas
+);
+document
+.getElementById(
+"btnSolicitudes"
+)
+.addEventListener(
+"click",
+()=>{
+
+ocultarTodo();
+
+document
+.getElementById(
+"contenedorSolicitudes"
+)
+.style.display =
+"block";
+
+cargarSolicitudes();
+
+}
+);
+
+async function cargarAsesores(){
+
+const rol =
+localStorage.getItem("rol");
+
+if(rol !== "ADMIN"){
+    return;
+}
+    ocultarTodo();
+
+document
+.getElementById(
+"contenedorAsesores"
+)
+.style.display =
+"block";
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+        body:JSON.stringify({
+            action:"listarAsesores"
+        })
+    });
+
+    const asesores =
+    await respuesta.json();
+
+    let html = `
+
+    <h2>Administración de Asesores</h2>
+
+    <div style="
+        background:white;
+        padding:20px;
+        border-radius:15px;
+        margin-bottom:20px;
+    ">
+
+        <h3>Nuevo Asesor</h3>
+
+        <input
+        id="nuevoUsuario"
+        placeholder="Usuario">
+
+        <input
+        id="nuevoPassword"
+        placeholder="Contraseña">
+
+        <input
+        id="nuevoNombre"
+        placeholder="Nombre">
+
+        <button
+        onclick="crearAsesor()">
+
+            Guardar Asesor
+
+        </button>
+<input
+    id="buscarAsesor"
+    placeholder="🔍 Buscar asesor por nombre"
+    style="
+    margin-top:20px;
+    ">
+
+    </div>
+
+    <table class="tabla">
+
+        <tr>
+
+            <th>Usuario</th>
+
+            <th>Nombre</th>
+
+            <th>Estado</th>
+
+            <th style="text-align:center;">
+    Acciones
+</th>
+
+        </tr>
+
+    `;
+
+    asesores.forEach(a=>{
+
+        html += `
+
+        <tr>
+
+            <td>${a.usuario}</td>
+
+            <td>${a.nombre}</td>
+
+            <td>${a.estado}</td>
+
+            <td style="text-align:center;">
+
+<div style="
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+">
+
+    <button
+    style="
+    width:auto;
+    padding:10px 18px;
+    margin:0;
+    "
+    onclick="
+    cambiarEstadoAsesor(
+    '${a.usuario}'
+    )">
+
+    ${a.estado==="ACTIVO"
+    ? "Desactivar"
+    : "Activar"}
+
+    </button>
+
+    <button
+    style="
+    width:auto;
+    padding:10px 18px;
+    margin:0;
+    "
+    onclick="
+    verPasswordAsesor(
+    '${a.usuario}'
+    )">
+
+    Contraseña
+
+    </button>
+
+    <button
+    style="
+    width:auto;
+    padding:10px 18px;
+    margin:0;
+    "
+    onclick="
+    cambiarPasswordAsesor(
+    '${a.usuario}'
+    )">
+
+    Cambiar Clave
+
+    </button>
+
+<button
+style="
+width:auto;
+padding:10px 18px;
+margin:0;
+background:#dc2626;
+"
+onclick="
+eliminarAsesor(
+'${a.usuario}'
+)">
+
+Eliminar
+
+</button>
+</div>
+
+</td>
+
+        </tr>
+
+        `;
+
+    });
+
+    html += `
+    </table>
+    `;
+
+    document
+    .getElementById(
+    "contenedorAsesores"
+    )
+    .innerHTML = html;
+document
+.getElementById(
+"buscarAsesor"
+)
+.addEventListener(
+"input",
+function(){
+
+const texto =
+this.value.toUpperCase();
+
+const filas =
+document.querySelectorAll(
+"#contenedorAsesores table tr"
+);
+
+filas.forEach((fila,i)=>{
+
+if(i===0)return;
+
+const nombre =
+fila.children[1]
+.textContent
+.toUpperCase();
+
+fila.style.display =
+nombre.includes(texto)
+? ""
+: "none";
+
+});
+
+});
+}
+async function crearAsesor(){
+
+    const usuario =
+    document
+    .getElementById(
+    "nuevoUsuario"
+    )
+    .value;
+
+    const password =
+    document
+    .getElementById(
+    "nuevoPassword"
+    )
+    .value;
+
+    const nombre =
+    document
+    .getElementById(
+    "nuevoNombre"
+    )
+    .value;
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+
+        body:JSON.stringify({
+
+            action:"crearAsesor",
+
+            usuario:usuario,
+
+            password:password,
+
+            nombre:nombre
+
+        })
+
+    });
+
+    const resultado =
+    await respuesta.json();
+
+    if(resultado.ok){
+
+    mostrarNotificacion(
+
+    "Asesor creado",
+
+    "El asesor fue registrado correctamente."
+
+    );
+
+    cargarAsesores();
+
+}
+else{
+
+    mostrarNotificacion(
+
+    "No se pudo crear el asesor",
+
+    resultado.mensaje
+
+    );
+
+}
+}
+async function cambiarEstadoAsesor(usuario){
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+
+        body:JSON.stringify({
+
+            action:
+            "cambiarEstadoAsesor",
+
+            usuario:usuario
+
+        })
+
+    });
+
+    const resultado =
+    await respuesta.json();
+
+    if(resultado.ok){
+
+        cargarAsesores();
+
+    }
+
+}
+async function cambiarPasswordAsesor(usuario){
+
+    const nuevaPassword =
+    prompt(
+    "Nueva contraseña para " +
+    usuario
+    );
+
+    if(!nuevaPassword){
+        return;
+    }
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+
+        body:JSON.stringify({
+
+            action:
+            "cambiarPasswordAsesor",
+
+            usuario:usuario,
+
+            password:nuevaPassword
+
+        })
+
+    });
+
+    const resultado =
+    await respuesta.json();
+
+    if(resultado.ok){
+
+        mostrarNotificacion(
+
+"Contraseña actualizada",
+
+"La contraseña fue modificada correctamente."
+
+);
+
+    }
+
+}
+async function verPasswordAsesor(usuario){
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+
+        body:JSON.stringify({
+
+            action:
+            "obtenerPasswordAsesor",
+
+            usuario:usuario
+
+        })
+
+    });
+
+    const resultado =
+    await respuesta.json();
+
+    if(resultado.ok){
+
+        document
+        .getElementById(
+        "passwordAsesor"
+        )
+        .textContent =
+        resultado.password;
+
+        document
+        .getElementById(
+        "modalPassword"
+        )
+        .style.display =
+        "flex";
+
+    }
+
+}
+async function eliminarAsesor(usuario){
+mostrarConfirmacion(
+
+"Eliminar Asesor",
+
+"¿Desea eliminar el asesor?<br><br><b>" +
+
+usuario +
+
+"</b>",
+
+async ()=>{
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+    {
+        method:"POST",
+
+        body:JSON.stringify({
+
+            action:
+            "eliminarAsesor",
+
+            usuario:usuario
+
+        })
+
+    });
+
+    const resultado =
+    await respuesta.json();
+
+    if(resultado.ok){
+
+        cargarAsesores();
+
+        mostrarNotificacion(
+
+        "Asesor eliminado",
+
+        "El asesor fue eliminado correctamente."
+
+        );
+
+    }
+    else{
+
+        mostrarNotificacion(
+
+        "Error",
+
+        "No se pudo eliminar."
+
+        );
+
+    }
+
+}
+
+);
+
+}
+    
+function formatearFecha(fecha){
+
+    const f =
+    new Date(fecha);
+
+    return f.toLocaleString(
+    "es-PE",
+    {
+
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric",
+
+        hour:"2-digit",
+        minute:"2-digit",
+
+        hour12:true
+
+    }
+
+    );
+
+}
+function ocultarTodo(){
+
+document.getElementById(
+"dashboard"
+).style.display="none";
+
+document.getElementById(
+"herramientas"
+).style.display="none";
+
+document.getElementById(
+"contenedorLotes"
+).style.display="none";
+
+document.getElementById(
+"contenedorAuditoria"
+).style.display="none";
+
+document.getElementById(
+"contenedorAsesores"
+).style.display="none";
+
+document.getElementById(
+"contenedorConsultas"
+).style.display="none";
+
+document.getElementById(
+"contenedorSolicitudes"
+).style.display="none";
+
+}
+async function cargarConsultas(){
+
+    const rol =
+    localStorage.getItem(
+    "rol"
+    );
+
+    if(rol !== "ADMIN"){
+        return;
+    }
+
+    ocultarTodo();
+
+document
+.getElementById(
+"contenedorConsultas"
+)
+.style.display =
+"block";
+
+    const respuesta =
+    await fetch(
+    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=consultas"
+    );
+
+    const datos =
+    await respuesta.json();
+
+    // Más recientes primero
+    datos.sort((a,b)=>{
+
+        return new Date(b.Fecha)
+        -
+        new Date(a.Fecha);
+
+    });
+
+    let html = `
+
+    <h2>Consultas Recibidas</h2>
+
+    <div style="
+    background:#fff;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    ">
+
+    <h3>
+    🔔 Últimas Consultas
+    </h3>
+
+    `;
+
+    datos
+.slice(0,5)
+.forEach(c=>{
+
+html += `
+
+<div style="
+padding:15px 0;
+border-bottom:1px solid #eee;
+">
+
+    <div>
+        <b>Nombre:</b>
+        ${c.Nombre || ""}
+    </div>
+
+    <div>
+        <b>Lote:</b>
+        ${c.Lote || ""}
+    </div>
+
+    <div>
+        <b>Teléfono:</b>
+        ${c.Telefono || ""}
+    </div>
+
+    <div>
+        <b>Mensaje:</b>
+        ${c.Mensaje || ""}
+    </div>
+
+    <div style="
+    color:#666;
+    margin-top:5px;
+    ">
+        ${formatearFecha(c.Fecha)}
+    </div>
+
+</div>
+
+`;
+
+});
+
+        
+
+    html += `
+
+    </div>
+
+    <table class="tabla">
+
+        <tr>
+
+            <th>Fecha</th>
+            <th>Lote</th>
+            <th>Estado</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Mensaje</th>
+
+        </tr>
+
+    `;
+
+    datos.forEach(c=>{
+
+        html += `
+
+        <tr>
+
+            <td>${formatearFecha(c.Fecha)}</td>
+            <td>${c.Lote || ""}</td>
+            <td>${c.Estado || ""}</td>
+            <td>${c.Nombre || ""}</td>
+            <td>${c.Email || ""}</td>
+            <td>${c.Telefono || ""}</td>
+            <td>${c.Mensaje || ""}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+    html += `
+    </table>
+    `;
+
+    document
+.getElementById(
+"contenedorConsultas"
+)
+.innerHTML =
+html;
+
+localStorage.setItem(
+"consultasVistas",
+Date.now()
+);
+
+}
+let solicitudesGlobal = [];
+
+async function actualizarContadorSolicitudes(){
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=solicitudes"
+);
+
+const solicitudes =
+await respuesta.json();
+
+const total =
+solicitudes.length;
+
+document
+.getElementById(
+"contadorSolicitudes"
+)
+.innerHTML =
+total > 0
+? ` (${total})`
+: "";
+
+}
+async function verificarNuevasSolicitudes(){
+
+const rol =
+localStorage.getItem("rol");
+
+if(rol !== "ADMINISTRADOR"){
+return;
+}
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=solicitudes"
+);
+
+const solicitudes =
+await respuesta.json();
+
+const totalActual =
+solicitudes.length;
+if(totalSolicitudesAnterior === 0){
+
+totalSolicitudesAnterior =
+totalActual;
+
+return;
+
+}
+
+if(
+totalSolicitudesAnterior > 0 &&
+totalActual > totalSolicitudesAnterior
+){
+
+const ultima =
+solicitudes[0];
+
+mostrarNotificacion(
+
+"🔔 Nueva solicitud",
+
+"El asesor <b>" +
+
+ultima.usuario +
+
+"</b> solicitó cambiar el estado del lote <b>" +
+
+ultima.lote +
+
+"</b>"
+
+);
+
+}
+
+totalSolicitudesAnterior =
+totalActual;
+
+}
+async function sincronizarPanel(){
+
+const rol =
+localStorage.getItem("rol");
+
+try{
+
+await cargarLotes();
+
+if(
+rol === "ADMINISTRADOR"
+){
+
+actualizarContadorSolicitudes();
+
+if(
+document.getElementById(
+"contenedorSolicitudes"
+).style.display !== "none"
+){
+
+cargarSolicitudes();
+
+}
+
+if(
+document.getElementById(
+"contenedorConsultas"
+).style.display !== "none"
+){
+
+cargarConsultas();
+
+}
+
+if(
+document.getElementById(
+"contenedorAuditoria"
+).style.display !== "none"
+){
+
+cargarAuditoria();
+
+}
+
+}
+document
+.getElementById(
+"ultimaActualizacion"
+)
+.innerHTML =
+
+"🟢 Última actualización: " +
+
+new Date()
+.toLocaleString(
+"es-PE"
+);
+}catch(error){
+
+console.log(
+"Error sincronizando:",
+error
+);
+
+}
+
+}
+async function cargarSolicitudes(){
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=solicitudes"
+);
+
+const solicitudes =
+await respuesta.json();
+actualizarContadorSolicitudes();
+
+solicitudesGlobal =
+solicitudes;
+
+renderizarSolicitudes(
+solicitudes
+);
+
+}
+
+function renderizarSolicitudes(
+solicitudes
+){
+
+let html = `
+
+<table class="tabla">
+
+<tr>
+
+<th>Fecha</th>
+<th>Usuario</th>
+<th>Lote</th>
+<th>Actual</th>
+<th>Solicita</th>
+<th>Acción</th>
+
+</tr>
+
+`;
+
+solicitudes.forEach(s=>{
+
+const fecha =
+new Date(s.fecha);
+
+const fechaFormateada =
+fecha.toLocaleString(
+'es-PE',
+{
+day:'2-digit',
+month:'2-digit',
+year:'numeric',
+hour:'2-digit',
+minute:'2-digit',
+hour12:true
+}
+);
+
+html += `
+
+<tr>
+
+<td>${fechaFormateada}</td>
+
+<td>${s.usuario}</td>
+
+<td>${s.lote}</td>
+
+<td>${s.actual}</td>
+
+<td>${s.solicita}</td>
+
+<td>
+
+<button
+class="btn-verde"
+onclick="aprobarSolicitud(${s.fila})">
+Aprobar
+</button>
+
+<button
+class="btn-rojo"
+onclick="rechazarSolicitud(${s.fila})">
+Rechazar
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+html += "</table>";
+
+document
+.getElementById(
+"listaSolicitudes"
+)
+.innerHTML =
+html;
+
+}
+
+function filtrarSolicitudes(){
+
+const texto =
+document
+.getElementById(
+"buscarSolicitud"
+)
+.value
+.toUpperCase();
+
+const filtradas =
+solicitudesGlobal.filter(s=>
+
+s.usuario
+.toUpperCase()
+.includes(texto)
+
+||
+
+s.lote
+.toUpperCase()
+.includes(texto)
+
+);
+
+renderizarSolicitudes(
+filtradas
+);
+
+}
+async function aprobarSolicitud(fila){
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+{
+method:"POST",
+
+body:JSON.stringify({
+
+action:
+"aprobarSolicitud",
+
+fila:fila
+
+})
+
+}
+);
+
+const resultado =
+await respuesta.json();
+
+if(resultado.ok){
+actualizarContadorSolicitudes();
+await cargarSolicitudes();
+
+await cargarLotes();
+
+mostrarNotificacion(
+
+"Solicitud aprobada",
+
+"La solicitud fue aprobada y el lote fue actualizado correctamente."
+
+);
+
+}
+
+}
+async function rechazarSolicitud(fila){
+
+const respuesta =
+await fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+{
+method:"POST",
+
+body:JSON.stringify({
+
+action:
+"rechazarSolicitud",
+
+fila:fila
+
+})
+
+}
+);
+
+const resultado =
+await respuesta.json();
+
+if(resultado.ok){
+actualizarContadorSolicitudes();
+
+await cargarSolicitudes();
+
+mostrarNotificacion(
+
+"Solicitud rechazada",
+
+"El cambio solicitado fue rechazado."
+
+);
+
+}
+
+}
+
+function mostrarNotificacion(
+titulo,
+mensaje
+){
+
+document
+.getElementById(
+"tituloNotificacion"
+)
+.innerHTML =
+titulo;
+
+document
+.getElementById(
+"mensajeNotificacion"
+)
+.innerHTML =
+mensaje;
+
+document
+.getElementById(
+"modalNotificacion"
+)
+.style.display =
+"flex";
+
+}
+async function verificarNotificaciones(){
+
+const usuario =
+localStorage.getItem(
+"usuario"
+);
+
+if(!usuario){
+return;
+}
+
+const respuesta =
+await fetch(
+
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec?action=notificaciones&usuario="
+
++ encodeURIComponent(usuario)
+
+);
+
+const notificaciones =
+await respuesta.json();
+
+colaNotificaciones =
+notificaciones;
+
+mostrarSiguienteNotificacion();
+
+}
+function mostrarSiguienteNotificacion(){
+
+if(
+colaNotificaciones.length === 0
+){
+return;
+}
+
+const n =
+colaNotificaciones.shift();
+
+if(
+n.estado === "APROBADO"
+){
+
+mostrarNotificacion(
+
+"Solicitud aprobada",
+
+"Su solicitud para el lote <b>" +
+
+n.lote +
+
+"</b> fue aprobada."
+
+);
+
+}
+else{
+
+mostrarNotificacion(
+
+"Solicitud rechazada",
+
+"Su solicitud para el lote <b>" +
+
+n.lote +
+
+"</b> fue rechazada."
+
+);
+
+}
+
+fetch(
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec",
+{
+method:"POST",
+
+body:JSON.stringify({
+
+action:
+"marcarNotificacionLeida",
+
+fila:n.fila
+
+})
+
+}
+);
+
+}
+document
+.getElementById(
+"btnCerrarNotificacion"
+)
+.onclick = ()=>{
+
+document
+.getElementById(
+"modalNotificacion"
+)
+.style.display =
+"none";
+if(
+colaNotificaciones.length > 0
+){
+
+setTimeout(
+mostrarSiguienteNotificacion,
+200
+);
+
+}
+console.log(window.actualizarPendiente);
+if(window.actualizarPendiente){
+
+window.actualizarPendiente = false;
+
+cargarLotes();
+
+}
+
+};
+let accionConfirmada = null;
+
+function mostrarConfirmacion(
+titulo,
+mensaje,
+callback
+){
+
+document
+.getElementById(
+"tituloConfirmacion"
+)
+.innerHTML =
+titulo;
+
+document
+.getElementById(
+"mensajeConfirmacion"
+)
+.innerHTML =
+mensaje;
+
+accionConfirmada =
+callback;
+
+document
+.getElementById(
+"modalConfirmacion"
+)
+.style.display =
+"flex";
+
+}
+
+window.addEventListener(
+"load",
+()=>{
+
+document
+.getElementById(
+"btnCancelarConfirmacion"
+)
+.onclick = ()=>{
+
+document
+.getElementById(
+"modalConfirmacion"
+)
+.style.display =
+"none";
+
+};
+
+document
+.getElementById(
+"btnAceptarConfirmacion"
+)
+.onclick = ()=>{
+
+document
+.getElementById(
+"modalConfirmacion"
+)
+.style.display =
+"none";
+
+if(accionConfirmada){
+
+accionConfirmada();
+
+}
+
+};
+
+}
+);
+
+window.onload = ()=>{
+
+    if(
+        localStorage.getItem(
+        "logeado"
+        ) === "SI"
+    ){
+
+        document
+        .getElementById(
+        "loginBox"
+        )
+        .style.display =
+        "none";
+
+        document
+        .getElementById(
+        "panel"
+        )
+        .style.display =
+        "block";
+
+        document
+        .getElementById(
+        "usuarioLogeado"
+        )
+        .innerHTML =
+
+        "<h2>Bienvenido " +
+
+        localStorage.getItem(
+        "usuario"
+        ) +
+
+        "</h2>" +
+
+        "<p><b>Rol:</b> " +
+
+        localStorage.getItem(
+        "rol"
+        ) +
+
+        "</p>";
+
+        (async()=>{
+
+await cargarLotes();
+
+await verificarNotificaciones();
+await actualizarContadorSolicitudes();
+await verificarNuevasSolicitudes();
+
+setInterval(
+verificarNuevasSolicitudes,
+15000
+);
+setInterval(
+sincronizarPanel,
+30000
+);
+
+})();
+
+aplicarPermisosRol(
+localStorage.getItem("rol")
+);
+
+    }
+
+};
+document
+.getElementById(
+"cerrarSesion"
+)
+.onclick=()=>{
+
+localStorage.removeItem(
+"logeado"
+);
+
+localStorage.removeItem(
+"usuario"
+);
+
+localStorage.removeItem(
+"rol"
+);
+
+document.getElementById(
+"btnAuditoria"
+).style.display = "none";
+
+document.getElementById(
+"btnAsesores"
+).style.display = "none";
+
+document.getElementById(
+"btnConsultas"
+).style.display = "none";
+
+location.reload();
+};
+document
+.getElementById("buscarLote")
+.addEventListener(
+"input",
+filtrarLotes
+);
+
+function filtrarLotes(){
+
+    const texto =
+    document
+    .getElementById(
+    "buscarLote"
+    )
+    .value
+    .toUpperCase();
+
+    let datos =
+    todosLosLotes.filter(
+    lote=>
+
+    lote.Lote
+    .toUpperCase()
+    .includes(texto)
+    );
+
+    if(
+    filtroActual !==
+    "TODOS"
+    ){
+
+        datos =
+        datos.filter(
+        lote=>
+
+        lote.Estado ===
+        filtroActual
+        );
+
+    }
+
+    renderizarLotes(datos);
+
+}
+document
+.getElementById(
+"filtroTodos"
+)
+.onclick=()=>{
+
+    filtroActual="TODOS";
+
+    filtrarLotes();
+
+};
+
+document
+.getElementById(
+"filtroLibres"
+)
+.onclick=()=>{
+
+    filtroActual="LIBRE";
+
+    filtrarLotes();
+
+};
+
+document
+.getElementById(
+"filtroReservados"
+)
+.onclick=()=>{
+
+    filtroActual="RESERVADO";
+
+    filtrarLotes();
+
+};
+
+document
+.getElementById(
+"filtroVendidos"
+)
+.onclick=()=>{
+
+    filtroActual="VENDIDO";
+
+    filtrarLotes();
+
+};
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:transparent;
+}
+
+svg{
+    width:100%;
+    height:100%;
+}
+</style>
+
+</head>
+
+<body>
+
+<svg viewBox="0 0 100 100" preserveAspectRatio="none">
+
+```
+<rect
+    id="fondo"
+    x="0"
+    y="0"
+    width="100"
+    height="100"
+    fill="#FFFFFF"
+    fill-opacity="0">
+</rect>
+```
+
+</svg>
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec";
+
+const params = new URLSearchParams(window.location.search);
+const LOTE = params.get("lote");
+console.log("LOTE URL:", LOTE);
+
+const fondo = document.getElementById("fondo");
+
+const esMovil =
+/Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
+.test(navigator.userAgent);
+
+async function actualizarColor(){
+
+    try{
+
+        const response = await fetch(
+            API_URL + "?t=" + Date.now(),
+            {
+                cache:"no-store"
+            }
+        );
+
+        const datos = await response.json();
+
+        const fila = datos.find(item => {
+
+            const idLote = String(item.Lote || "")
+                .trim()
+                .replace(/\s+/g," ");
+
+            const loteBuscado = String(LOTE || "")
+                .trim()
+                .replace(/\s+/g," ");
+
+            return idLote === loteBuscado;
+
+        });
+
+        if(!fila){
+            console.log("Lote no encontrado:", LOTE);
+            return;
+        }
+
+        const estado = String(fila.Estado || "")
+            .trim()
+            .toUpperCase();
+
+        let color = "FFFF00";
+        let opacidad = "0.30";
+
+        if(estado === "VENDIDO"){
+            color = "FF0000";
+        }
+        else if(estado === "RESERVADO"){
+            color = "00FFFF";
+        }
+        else{
+            color = "FFFF00";
+        }
+
+        fondo.setAttribute("fill","#" + color);
+        fondo.setAttribute("fill-opacity",opacidad);
+
+        console.log(
+            "Lote:",
+            fila.Lote,
+            "Estado:",
+            estado
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+if(!esMovil){
+
+    actualizarColor();
+
+    setInterval(
+        actualizarColor,
+        5000
+    );
+
+}
+
+</script>
+
+</body>
+</html>
