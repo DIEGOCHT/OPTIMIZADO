@@ -514,6 +514,44 @@ function obtenerParametro(nombre){
 
 }
 
+// ===============================
+// CACHE COMPARTIDA DE LOTES
+// ===============================
+
+const canalLotes = new BroadcastChannel("LOTES");
+
+function actualizarCache(datos){
+
+    const cache = {};
+
+    datos.forEach(item=>{
+
+        cache[item.Lote] = item;
+
+    });
+
+    localStorage.setItem(
+        "LOTES_CACHE",
+        JSON.stringify(cache)
+    );
+
+    canalLotes.postMessage({
+
+        tipo:"CACHE_ACTUALIZADA",
+
+        fecha:Date.now(),
+
+        total:datos.length
+
+    });
+
+    console.log(
+        "Cache actualizada:",
+        datos.length,
+        "lotes"
+    );
+
+}
 function cargarLote(){
 
     const script = document.createElement("script");
@@ -526,6 +564,7 @@ function cargarLote(){
 }
 
 function procesarDatos(datos){
+actualizarCache(datos);
 
     const loteBuscado =
     obtenerParametro("lote");
