@@ -1,24 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Prueba Lotes Cache</title>
+</head>
+<body>
+
+<h2>Prueba LotesCache</h2>
+
+<script src="lotes_cache.js"></script>
+
 <script>
 
-const canal = new BroadcastChannel("LOTES");
+(async()=>{
 
-const params = new URLSearchParams(location.search);
-const nombre = params.get("id");
+    console.log("Iniciando...");
 
-console.log(nombre + " iniciado");
+    const datos = await LotesCache.actualizar();
 
-canal.onmessage = function(e){
+    console.log("Cache creada");
 
-    console.log(nombre + " recibió:", e.data);
+    console.log(datos);
 
-};
-
-setTimeout(()=>{
-
-    canal.postMessage(nombre + " dice HOLA");
-
-    console.log(nombre + " envió");
-
-},3000);
+})();
 
 </script>
+
+</body>
+</html>
