@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+
+<body>
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec";
+
+const canal =
+new BroadcastChannel("LOTES");
+
+(async()=>{
+
+    try{
+
+        const response =
+        await fetch(
+            API_URL + "?t=" + Date.now(),
+            {
+                cache:"no-store"
+            }
+        );
+
+        const datos =
+        await response.json();
+
+        localStorage.setItem(
+            "LOTES_CACHE",
+            JSON.stringify(datos)
+        );
+
+        canal.postMessage({
+
+            tipo:"CACHE_ACTUALIZADA",
+
+            total:datos.length,
+
+            fecha:Date.now()
+
+        });
+
+        console.log(
+            "Cache creada:",
+            datos.length,
+            "lotes"
+        );
+
+    }
+    catch(e){
+
+        console.error(e);
+
+    }
+
+})();
+
+</script>
+
+</body>
+</html>
