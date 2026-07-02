@@ -123,22 +123,18 @@ if(!esMovil){
 
         actualizarColor();
 
-    },1000);
+// Escuchar cuando la cache cambie
+const canal = new BroadcastChannel("LOTES");
 
-    // Escuchar cuando la cache cambie
-    const canal = new BroadcastChannel("LOTES");
+canal.onmessage = function(e){
 
-    canal.onmessage = function(e){
+    if(e.data.tipo === "CACHE_ACTUALIZADA"){
 
-        if(e.data.tipo === "CACHE_ACTUALIZADA"){
+        actualizarColor();
 
-            console.log("Cache actualizada:", LOTE);
+    }
 
-            actualizarColor();
-
-        }
-
-    };
+};
 
 }
 
