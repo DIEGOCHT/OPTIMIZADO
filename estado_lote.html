@@ -25,8 +25,7 @@ svg{
 
 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
 
-```
-<rect
+    <rect
     id="fondo"
     x="0"
     y="0"
@@ -35,10 +34,8 @@ svg{
     fill="#FFFFFF"
     fill-opacity="0">
 </rect>
-```
 
 </svg>
-
 <script>
 console.log("Estado:", location.origin);
 
@@ -101,8 +98,8 @@ console.log("FILA:", fila);
             color = "FFFF00";
         }
 
-        fondo.setAttribute("fill","#" + color);
-        fondo.setAttribute("fill-opacity",opacidad);
+        fondo.setAttribute("fill","#"+color);
+fondo.setAttribute("fill-opacity",opacidad);
 console.log("PINTADO:", LOTE);
 
         console.log(
@@ -121,27 +118,23 @@ console.log("PINTADO:", LOTE);
 
 }
 
-if(!esMovil){
+setTimeout(function(){
 
-    // Esperar 1 segundo para que el Skin cree la cache
-    setTimeout(function(){
+    actualizarColor();
 
-        actualizarColor();
+},1000);
 
-// Escuchar cuando la cache cambie
 const canal = new BroadcastChannel("LOTES");
 
 canal.onmessage = function(e){
 
-    if(e.data.tipo === "CACHE_ACTUALIZADA"){
+    if(e.data.tipo==="CACHE_ACTUALIZADA"){
 
         actualizarColor();
 
     }
 
 };
-
-}
 
 </script>
 
