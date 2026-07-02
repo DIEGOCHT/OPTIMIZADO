@@ -58,28 +58,21 @@ async function actualizarColor(){
 
     try{
 
-        const response = await fetch(
-            API_URL + "?t=" + Date.now(),
-            {
-                cache:"no-store"
-            }
-        );
+        const datos = JSON.parse(
+    localStorage.getItem("LOTES_CACHE") || "{}"
+);
 
-        const datos = await response.json();
+        const loteBuscado = String(LOTE || "")
+    .trim()
+    .replace(/\s+/g," ");
 
-        const fila = datos.find(item => {
+console.log("LOTE BUSCADO:", loteBuscado);
 
-            const idLote = String(item.Lote || "")
-                .trim()
-                .replace(/\s+/g," ");
+console.log("CLAVES CACHE:", Object.keys(datos));
 
-            const loteBuscado = String(LOTE || "")
-                .trim()
-                .replace(/\s+/g," ");
+const fila = datos[loteBuscado];
 
-            return idLote === loteBuscado;
-
-        });
+console.log("FILA:", fila);
 
         if(!fila){
             console.log("Lote no encontrado:", LOTE);
@@ -124,12 +117,27 @@ async function actualizarColor(){
 
 if(!esMovil){
 
-    actualizarColor();
+    // Esperar 1 segundo para que el Skin cree la cache
+    setTimeout(function(){
 
-    setInterval(
-        actualizarColor,
-        5000
-    );
+        actualizarColor();
+
+    },1000);
+
+    // Escuchar cuando la cache cambie
+    const canal = new BroadcastChannel("LOTES");
+
+    canal.onmessage = function(e){
+
+        if(e.data.tipo === "CACHE_ACTUALIZADA"){
+
+            console.log("Cache actualizada:", LOTE);
+
+            actualizarColor();
+
+        }
+
+    };
 
 }
 
