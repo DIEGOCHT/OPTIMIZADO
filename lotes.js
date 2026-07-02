@@ -1,78 +1,49 @@
-// =====================================
-// LOTES.JS
-// Administrador central de lotes
-// =====================================
-
-const Lotes = (() => {
+window.Lotes = (() => {
 
     const API_URL =
-    "https://script.google.com/macros/s/AKfycbzju385U93y9LzS-yStDOsO9i2vo97oAS-VaKRkMsV3giDUud34jAB5pbwvDior0tbN/exec";
+    "TU_APPS_SCRIPT";
 
     const CACHE_KEY = "LOTES_CACHE";
 
-    const canal = new BroadcastChannel("LOTES");
+    const canal =
+    new BroadcastChannel("LOTES");
 
     async function actualizar(){
 
-        console.log("Actualizando cache...");
-
         const response = await fetch(
             API_URL + "?t=" + Date.now(),
-            {
-                cache:"no-store"
-            }
+            { cache:"no-store" }
         );
 
         const datos = await response.json();
 
-        const cache = {};
-
-        datos.forEach(item=>{
-
-            cache[item.Lote]=item;
-
-        });
-
+        // Guardar respaldo
         localStorage.setItem(
-
             CACHE_KEY,
-
-            JSON.stringify(cache)
-
+            JSON.stringify(datos)
         );
 
+        // Enviar datos completos
         canal.postMessage({
 
             tipo:"CACHE_ACTUALIZADA",
 
-            total:datos.length,
+            datos:datos,
 
             fecha:Date.now()
 
         });
 
-        console.log(
-            "Cache actualizada:",
-            datos.length
-        );
+        return datos;
 
     }
 
-    function obtener(nombre){
-
-        const cache =
-        JSON.parse(
-            localStorage.getItem(CACHE_KEY)||"{}"
-        );
-
-        return cache[nombre]||null;
-
-    }
-
-    function obtenerTodos(){
+    function leer(){
 
         return JSON.parse(
-            localStorage.getItem(CACHE_KEY)||"{}"
+
+            localStorage.getItem(CACHE_KEY)||"[]"
+
         );
 
     }
@@ -81,9 +52,9 @@ const Lotes = (() => {
 
         actualizar,
 
-        obtener,
+        leer,
 
-        obtenerTodos
+        canal
 
     };
 
