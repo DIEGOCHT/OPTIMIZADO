@@ -47,6 +47,7 @@ const API_URL =
 
 const params = new URLSearchParams(window.location.search);
 const LOTE = params.get("lote");
+console.log("INICIO:", LOTE);
 console.log("LOTE URL:", LOTE);
 
 const fondo = document.getElementById("fondo");
@@ -99,6 +100,7 @@ console.log("FILA:", fila);
 
         fondo.setAttribute("fill","#" + color);
         fondo.setAttribute("fill-opacity",opacidad);
+console.log("PINTADO:", LOTE);
 
         console.log(
             "Lote:",
